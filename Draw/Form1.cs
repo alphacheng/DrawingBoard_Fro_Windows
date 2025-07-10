@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -28,7 +28,12 @@ namespace Draw
         {
             InitializeComponent();
             System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
-            
+
+            // 初始化pictureBox1的Image
+            Bitmap bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            pictureBox1.Image = bitmap;
+
+
             button2.ForeColor = Color.Red ;
             color = Color.Blue;   //初始让color为黑色
             for (int i = 2; i <= 72 ; i+=2 )  //初始化添加字体选择下拉表框
@@ -183,47 +188,22 @@ namespace Draw
         //    pbmap = new Bitmap(pictureBox1.Width, pictureBox1.Height); 
         }
 
-        private void 保存文件ToolStripMenuItem_Click(object sender, EventArgs e)   //保存文件
+        private void 保存文件ToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (pictureBox1.Image == null)
+            {
+                MessageBox.Show("没有图像可以保存", "错误");
+                return;
+            }
 
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            //saveFileDialog1.Filter = "保存(*.bmp)|*.bmp";
-            //saveFileDialog1.FilterIndex = 2;
-            //saveFileDialog1.RestoreDirectory = true;
-            //if (DialogResult.OK == saveFileDialog1.ShowDialog())
-            //{
-            //    if (pictureBox1.Image != null)
-            //    {
-            //        Bitmap bmp = new Bitmap(pictureBox1.Image);
-            //        g = Graphics.FromImage((Image)bmp);
-            //        pictureBox1.Image = (Image)bmp;
-            //        pictureBox1.Image.Save(saveFileDialog1.FileName);
-            //        bmp.Save(saveFileDialog1.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
-            //    }
-            //    else
-            //    {
-            //        MessageBox.Show("已保存");
-            //    }
-            //}
-            
-            Bitmap bmp = new Bitmap(pictureBox1.Image);
-            g = Graphics.FromImage((Image)bmp);
-            g.DrawRectangle(p, 0, 0, 100, 100);
-            pictureBox1.Image = (Image)bmp;
-            saveFileDialog1.Title = "save the pictrue";
+            saveFileDialog1.Title = "保存图像";
             saveFileDialog1.Filter = "jpg图片(*.jpg)|*.jpg|bmp图片(*.bmp)|*.bmp";
             saveFileDialog1.InitialDirectory = "f:\\";
 
-            if ((saveFileDialog1.FileName != null) && (saveFileDialog1.ShowDialog() == DialogResult.OK))
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                bmp.Save("C:\\Picture1.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
-                bmp.Dispose();
                 pictureBox1.Image.Save(saveFileDialog1.FileName);
-            }
-            else
-            {
-                return;
-
             }
         }
 
@@ -231,25 +211,25 @@ namespace Draw
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();  //声明一个打开对象
             openFileDialog1.Multiselect = false;
-            //if (openFileDialog1.ShowDialog() == DialogResult.OK)
-            //{
-            //    //修改窗口标题  
-            //    this.Text = "MyDraw\t" + openFileDialog1.FileName;
-            //    editFileName = openFileDialog1.FileName;
-            //    theImage = Image.FromFile(openFileDialog1.FileName);
-            //    Graphics g = this.CreateGraphics();
-            //    g.DrawImage(theImage, this.ClientRectangle);
-            //    ig = Graphics.FromImage(theImage);
-            //    ig.DrawImage(theImage, this.ClientRectangle);
-            //    //ToolBar可以使用了  
-            //    toolStrip1.Enabled = true;
-            //}  
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                //修改窗口标题  
+                this.Text = "MyDraw\t" + openFileDialog1.FileName;
+                string editFileName = openFileDialog1.FileName;
+                Image theImage = Image.FromFile(openFileDialog1.FileName);
+                Graphics g = this.CreateGraphics();
+                g.DrawImage(theImage, this.ClientRectangle);
+                Graphics ig = Graphics.FromImage(theImage);
+                ig.DrawImage(theImage, this.ClientRectangle);
+                //ToolBar可以使用了  
+                toolStrip1.Enabled = true;
+            }
         }
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)  //鼠标按下
         {
-            x1 = e.X; y1 = e.Y; 
-            x2 = e.X; y2 = e.Y;             
+            x1 = e.X; y1 = e.Y;
+            x2 = e.X; y2 = e.Y;
             move = 1;
         }
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)  //鼠标松开
@@ -276,7 +256,8 @@ namespace Draw
         {
             timer1.Stop();
             Pen p2 = new Pen(color , font);
-            g = pictureBox1.CreateGraphics();
+            //g = pictureBox1.CreateGraphics();
+            Graphics g = Graphics.FromImage(pictureBox1.Image);
         if (move==1 && tool == 1)    //鼠标左击后到松开有效，且为画笔时才作图
             {
                 g.FillEllipse(Brushes.Blue , new Rectangle(x1-font/2, y1-font/2, font, font)); //只画圆心
