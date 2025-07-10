@@ -249,6 +249,7 @@ namespace Draw
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)  //鼠标按下
         {
             x1 = e.X; y1 = e.Y; 
+            x2 = e.X; y2 = e.Y;             
             move = 1;
         }
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)  //鼠标松开
